@@ -47,7 +47,7 @@ const getCompanies = async (): Promise<ICompany[]> => {
 const getCompany = async (uid: number): Promise<ICompany | null> => {
     const company = await Company.findByUid(uid);
     if (!company) {
-        throw new Error(CompanyError.COMPANY_NOT_FOUND);
+        return null;
     }
     return company;
 }

@@ -66,7 +66,9 @@ export const getCompanies = async (req: Request, res: Response) => {
 
 export const getCompany = async (req: Request, res: Response) => {
     try {
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate delay
         const uid = parseInt(req.params.id);
+        
         if (isNaN(uid)) {
             return BadRequest(res, {
                 data: null,
@@ -78,7 +80,7 @@ export const getCompany = async (req: Request, res: Response) => {
             });
         }
         const company = await companyService.getCompany(uid);
-        Success(res, { company });
+        Success(res, company);
     } catch (error: any) {
         Logger.error('Server Error during getting company:', error.message);
         if (error.message && error.message === CompanyError.COMPANY_NOT_FOUND) {

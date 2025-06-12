@@ -50,5 +50,5 @@ export function NotFound(res: Response, { data, meta }: ErrorResponseParam) {
 
 export function InternalServerError(res: Response, { data, meta }: ErrorResponseParam) {
     const error = new ErrorResponse({ data, meta });
-    return res.status(500).json({ error });
+    return res.status(500).json(error);
 }

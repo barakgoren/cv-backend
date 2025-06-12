@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import userRoutes from './routes/userRoutes';
 import companyRoutes from './routes/companyRoutes';
 import applicationRoutes from './routes/applicationRoutes';
+import applicationTypeRoutes from './routes/applicationTypeRoutes';
 import swaggerUi from 'swagger-ui-express';
 import swaggerDocs from './config/swaggerConfig';
 import dotenv from 'dotenv';
@@ -12,7 +13,7 @@ import cors from 'cors';
 dotenv.config(); // Load environment variables
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3005;
 const MONGO_URI = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@cluster0.frzuroc.mongodb.net/CV-Sys?retryWrites=true&w=majority`; // Updated connection string
 
 app.use(express.json());
@@ -29,6 +30,7 @@ app.get('/', (req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/application', applicationRoutes);
+app.use('/api/application-type', applicationTypeRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use('/*', (req, res) => {
   res.send(`

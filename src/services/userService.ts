@@ -7,7 +7,8 @@ import bcrypt from 'bcrypt';
 import { generateToken } from '../utils/auth';
 import Logger from '../utils/logger';
 import { MongoError } from 'mongodb';
-import { NotFound, Success } from '../utils/errorHandler';
+import { BadRequest, InternalServerError, NotFound, Success } from '../utils/errorHandler';
+import { excludeParam } from '../utils/object';
 
 export const createUser = async (req: Request, res: Response) => {
     try {
@@ -38,22 +39,31 @@ export const login = async (req: Request, res: Response) => {
     try {
         const parseResult = userLoginValidationSchema.safeParse(req.body);
         if (!parseResult.success) {
-            return res.status(400).send(parseResult.error.errors);
+            return BadRequest(res, {
+                data: null,
+                meta: { code: 400, title: 'Bad Request', message: parseResult.error.errors[0].message }
+            });
         }
-        const { email, password } = parseResult.data;
-        const user = await User.findOne({ email });
+        const { username, password } = parseResult.data;
+        const user = await User.findOne({ username });
         if (!user) {
             return NotFound(res, { data: null, meta: { code: 404, title: 'Not Found', message: 'User not found' } });
         }
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            return res.status(401).send("Invalid password");
+            return BadRequest(res, {
+                data: null,
+                meta: { code: 400, title: 'Bad Request', message: 'Invalid password' }
+            });
         }
         const token = generateToken(user._id);
         Success(res, token);
     } catch (error) {
-        Logger.error('Error logging in: ', error);
-        res.status(500).send("Error logging in");
+        Logger.error('Error logging in:', error);
+        return InternalServerError(res, {
+            data: null,
+            meta: { code: 500, title: 'Internal Server Error', message: 'Error logging in' }
+        });
     }
 };
 
@@ -61,11 +71,18 @@ export const getUserByToken = async (req: Request, res: Response) => {
     try {
         const user = req.body.user;
         if (!user) {
-            return res.status(404).send("User not found");
+            return NotFound(res, {
+                data: null,
+                meta: { code: 404, title: 'Not Found', message: 'User not found' }
+            });
         }
-        res.status(200).send(user);
+        const cleanUser = excludeParam(user.toObject(), 'password');
+        return Success(res, cleanUser);
     } catch (error) {
-        res.status(500).send("Error getting user");
+        return InternalServerError(res, {
+            data: null,
+            meta: { code: 500, title: 'Internal Server Error', message: 'Error getting user by token' }
+        });
     }
 };
 

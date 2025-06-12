@@ -10,6 +10,7 @@ export enum Permission {
 
 export interface IUser extends SoftDeleteDocument {
   name: string;
+  username: string;
   email: string;
   password: string;
   companyId?: number | null;
@@ -27,9 +28,15 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: true
     },
+    username: {
+      type: String,
+      required: true,
+      unique: true
+    },
     email: {
       type: String,
-      required: true
+      required: true,
+      unique: true,
     },
     password: {
       type: String,
@@ -53,7 +60,7 @@ const userSchema = new Schema<IUser>(
 
 userSchema.plugin(softDeletePlugin);
 
-userSchema.index({ email: 1, active: 1 }, { unique: true }); // Use createIndexes instead of ensureIndex
+userSchema.index({ email: 1, active: 1, username: 1 }, { unique: true }); // Use createIndexes instead of ensureIndex
 
 const User: UserModel = model<IUser, UserModel>('User', userSchema);
 

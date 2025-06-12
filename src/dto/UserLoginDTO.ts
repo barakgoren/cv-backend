@@ -5,10 +5,10 @@
  *     UserLoginDTO:
  *       type: object
  *       required:
- *         - email
+ *         - username
  *         - password
  *       properties:
- *         email:
+ *         username:
  *           type: string
  *           description: The user's email
  *         password:
@@ -16,7 +16,6 @@
  *           description: The user's password
  */
 export interface UserLoginDTO {
-    email: string;
-    password: string;
-  }
-  
+  email: string;
+  password: string;
+}
