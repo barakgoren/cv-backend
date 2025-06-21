@@ -9,6 +9,8 @@ import swaggerDocs from './config/swaggerConfig';
 import dotenv from 'dotenv';
 import Logger from './utils/logger';
 import cors from 'cors';
+import fs from 'fs';
+import path from 'path';
 
 dotenv.config(); // Load environment variables
 
@@ -19,6 +21,8 @@ const MONGO_URI = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGO
 app.use(express.json());
 app.use(cors());
 
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, '../public')));
 
 mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => Logger.log('MongoDB connected'))
@@ -33,7 +37,7 @@ app.use('/api/application', applicationRoutes);
 app.use('/api/application-type', applicationTypeRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use('/*', (req, res) => {
-  res.send(`
+  res.status(404).send(`
     <!DOCTYPE html>
     <html>
       <head>

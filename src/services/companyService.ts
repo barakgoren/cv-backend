@@ -52,6 +52,14 @@ const getCompany = async (uid: number): Promise<ICompany | null> => {
     return company;
 }
 
+const getCompanyByName = async (name: string): Promise<ICompany | null> => {
+    const company = await Company.findOne({ name });
+    if (!company) {
+        return null;
+    }
+    return company; // Assuming name is unique, return the first match
+}
+
 const deleteCompany = async (uid: number): Promise<void> => {
     const company = await Company.findByUid(uid);
     if (!company) {
@@ -75,4 +83,5 @@ export const companyService = {
     getCompanies,
     getCompany,
     deleteCompany,
+    getCompanyByName
 };

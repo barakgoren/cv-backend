@@ -1,6 +1,6 @@
 import express from 'express';
 import { isAdmin, isAuth } from '../utils/auth';
-import { createCompany, deleteCompany, getCompanies, getCompany } from '../controllers/company.controller';
+import { createCompany, deleteCompany, getCompanies, getCompany, getCompanyByIdentifier } from '../controllers/company.controller';
 
 const router = express.Router();
 
@@ -71,6 +71,27 @@ router.get('/', isAuth, isAdmin, getCompanies);
  *         description: User is not authorized to get companies
  */
 router.get('/:id', isAuth, isAdmin, getCompany);
+
+/**
+ * @swagger
+ * /api/company/public/{companyIdentifier}:
+ *   get:
+ *     summary: Get a company by ID, this is a public endpoint
+ *     tags: [Company]
+ *     parameters:
+ *       - in: path
+ *         name: companyIdentifier
+ *         required: true
+ *         description: Identifier of the company to get, can be either ID or slug
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Returns the company details
+ *       404:
+ *         description: Company not found
+ */
+router.get('/public/:companyIdentifier', getCompanyByIdentifier);
 
 
 /**

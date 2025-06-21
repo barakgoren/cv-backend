@@ -8,6 +8,23 @@ export interface IApplicationType extends SoftDeleteDocument {
     isActive: boolean;
 }
 
+export enum FieldType {
+    Text = 'text',
+    Email = 'email',
+    Tel = 'tel',
+    Textarea = 'textarea',
+    Url = 'url',
+    Number = 'number'
+}
+
+export interface IFormField {
+    fieldName: string; // The name attribute of the field
+    fieldType: FieldType; // The type of the input field
+    label: string; // The display label for the field
+    required: boolean; // Whether the field is required
+    placeholder?: string; // Placeholder text for the field   
+}
+
 export interface ApplicationTypeModel extends Model<IApplicationType> {
     findByUid(uid: number): Promise<IApplicationType | null>;
 }
@@ -29,6 +46,35 @@ const applicationTypeSchema = new Schema<IApplicationType>(
         isActive: {
             type: Boolean,
             default: false,
+        },
+        formFields: {
+            type: [
+                {
+                    fieldName: {
+                        type: String,
+                        required: true, // The name attribute of the field
+                    },
+                    fieldType: {
+                        type: String,
+                        enum: Object.values(FieldType), // The type of the input field
+                        required: true, // The type of the input field  
+                    },
+                    label: {
+                        type: String,
+                        required: true, // The display label for the field
+                    },
+                    required: {
+                        type: Boolean,
+                        default: false, // Whether the field is required
+                    },
+                    placeholder: {
+                        type: String,
+                        required: false, // Placeholder text for the field
+                    }
+                }
+            ],
+            default: [],
+            required: false, // Custom form fields for this application type
         }
     },
     {

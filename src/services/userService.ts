@@ -40,20 +40,23 @@ export const login = async (req: Request, res: Response) => {
         const parseResult = userLoginValidationSchema.safeParse(req.body);
         if (!parseResult.success) {
             return BadRequest(res, {
-                data: null,
-                meta: { code: 400, title: 'Bad Request', message: parseResult.error.errors[0].message }
+                message: parseResult.error.errors[0].message,
+                data: null
             });
         }
         const { username, password } = parseResult.data;
         const user = await User.findOne({ username });
         if (!user) {
-            return NotFound(res, { data: null, meta: { code: 404, title: 'Not Found', message: 'User not found' } });
+            return NotFound(res, { 
+                message: 'User not found',
+                data: null
+            });
         }
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             return BadRequest(res, {
-                data: null,
-                meta: { code: 400, title: 'Bad Request', message: 'Invalid password' }
+                message: 'Invalid password',
+                data: null
             });
         }
         const token = generateToken(user._id);
@@ -61,8 +64,8 @@ export const login = async (req: Request, res: Response) => {
     } catch (error) {
         Logger.error('Error logging in:', error);
         return InternalServerError(res, {
-            data: null,
-            meta: { code: 500, title: 'Internal Server Error', message: 'Error logging in' }
+            message: 'Error logging in',
+            data: null
         });
     }
 };
@@ -72,16 +75,16 @@ export const getUserByToken = async (req: Request, res: Response) => {
         const user = req.body.user;
         if (!user) {
             return NotFound(res, {
-                data: null,
-                meta: { code: 404, title: 'Not Found', message: 'User not found' }
+                message: 'User not found',
+                data: null
             });
         }
         const cleanUser = excludeParam(user.toObject(), 'password');
         return Success(res, cleanUser);
     } catch (error) {
         return InternalServerError(res, {
-            data: null,
-            meta: { code: 500, title: 'Internal Server Error', message: 'Error getting user by token' }
+            message: 'Error getting user by token',
+            data: null
         });
     }
 };

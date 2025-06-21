@@ -14,7 +14,8 @@ const companySchema = new Schema<ICompany>(
     {
         name: {
             type: String,
-            required: true
+            required: true,
+            trim: true,
         },
         users: {
             type: [Number],
@@ -28,6 +29,8 @@ const companySchema = new Schema<ICompany>(
 );
 
 companySchema.plugin(softDeletePlugin);
+companySchema.index({ active: 1, name: 1 }, { unique: true }); // Use createIndexes instead of ensureIndex
+
 
 const Company: CompanyModel = model<ICompany, CompanyModel>('Company', companySchema);
 

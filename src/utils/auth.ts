@@ -7,12 +7,8 @@ export const isAdmin = async (req: Request, res: Response, next: NextFunction) =
     const user = req.body.user;
     if (!user.permissions.includes(Permission.Admin)) {
         return Forbidden(res, {
-            data: null,
-            meta: {
-                code: 403,
-                title: 'Forbidden',
-                message: 'You do not have permission to access this resource'
-            }
+            message: 'You do not have permission to access this resource',
+            data: null
         });
     }
     next();
@@ -23,12 +19,8 @@ export const isAuth = async (req: Request, res: Response, next: NextFunction) =>
     const token = authHeader && authHeader.split(' ')[1];
     if (!token) {
         return BadRequest(res, {
-            data: null,
-            meta: {
-                code: 400,
-                title: 'Bad Request',
-                message: 'Token is required'
-            }
+            message: 'Token is required',
+            data: null
         });
     }
     if (!process.env.JWT_SECRET) {
@@ -37,24 +29,15 @@ export const isAuth = async (req: Request, res: Response, next: NextFunction) =>
     jwt.verify(token, process.env.JWT_SECRET, async (err: any, user: any) => {
         if (err) {
             return Unauthorized(res, {
-                data: null,
-                meta: {
-                    code: 403,
-                    title: 'Unauthorized',
-                    message: 'Invalid token'
-                }
+                message: 'Invalid token',
+                data: null
             });
         }
         const validUser = await User.findById(user._id);
         if (!validUser) {
-            // return res.status(404).send('Access denied - User not found');
             return NotFound(res, {
-                data: null,
-                meta: {
-                    code: 404,
-                    title: 'Not Found',
-                    message: 'User not found'
-                }
+                message: 'User not found',
+                data: null
             });
         }
         req.body.user = validUser;
