@@ -14,7 +14,9 @@ export enum FieldType {
     Tel = 'tel',
     Textarea = 'textarea',
     Url = 'url',
-    Number = 'number'
+    Number = 'number',
+    File = 'file',
+    Date = 'date',
 }
 
 export interface IFormField {

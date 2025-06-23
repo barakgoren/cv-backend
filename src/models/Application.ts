@@ -2,12 +2,14 @@ import mongoose, { model, Model, Schema } from 'mongoose';
 import { SoftDeleteDocument, softDeletePlugin } from '../utils/softPlugin';
 
 export interface IApplication extends SoftDeleteDocument {
-    firstName: string;
-    lastName: string;
-    companyId: number
-    email: string;
-    phone?: string;
-    resumeUrl?: string;
+    fullName: string; // Concatenation of firstName and lastName
+    companyId: number; // ID of the company the application is for
+    applicationTypeId?: number; // Optional ID for the application type
+    customFields?: Record<string, any>; // Custom fields for the application
+}
+
+export interface ApplicationResponse extends IApplication {
+    applicationTypeName: string | null; // Name of the application type, if applicable
 }
 
 export interface ApplicationModel extends Model<IApplication> {
@@ -16,29 +18,23 @@ export interface ApplicationModel extends Model<IApplication> {
 
 const applicationSchema = new Schema<IApplication>(
     {
-        firstName: {
+        fullName: {
             type: String,
-            required: true
-        },
-        lastName: {
-            type: String,
-            required: true
+            required: true,
+            trim: true
         },
         companyId: {
             type: Number,
             required: true
         },
-        email: {
-            type: String,
-            required: true,
+        applicationTypeId: {
+            type: Number,
+            required: false,
+            default: null
         },
-        phone: {
-            type: String,
-            required: false
-        },
-        resumeUrl: {
-            type: String,
-            required: false
+        customFields: {
+            type: Schema.Types.Mixed, // Allows for flexible custom fields
+            default: {}
         }
     },
     {

@@ -68,7 +68,6 @@ export const getCompanies = async (req: Request, res: Response) => {
 
 export const getCompany = async (req: Request, res: Response) => {
     try {
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate delay
         const uid = parseInt(req.params.id);
 
         if (isNaN(uid)) {
@@ -96,7 +95,6 @@ export const getCompany = async (req: Request, res: Response) => {
 
 export const getCompanyByIdentifier = async (req: Request, res: Response) => {
     try {
-        await new Promise(resolve => setTimeout(resolve, 3000)); // Simulate delay
         const identifier = req.params.companyIdentifier;
         if (!identifier) {
             return BadRequest(res, {

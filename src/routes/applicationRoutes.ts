@@ -1,5 +1,6 @@
 import express from 'express';
-import { postApplication } from '../controllers/application.controller';
+import { getApplication, getApplicationsByCompanyId, postApplication } from '../controllers/application.controller';
+import { isAuth } from '../utils/auth';
 
 const router = express.Router();
 
@@ -30,6 +31,11 @@ const router = express.Router();
  *      500:
  *       description: Internal server error
  */
-router.post('/:companyId', postApplication);
+router.post('/', postApplication);
+
+router.get('/company/:companyId', isAuth, getApplicationsByCompanyId);
+router.get('/:applicationId', isAuth, getApplication);
+
+
 
 export default router;

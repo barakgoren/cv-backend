@@ -131,7 +131,6 @@ export const updateApplicationType = async (req: Request, res: Response) => {
 
 export const getApplicationTypeById = async (req: Request, res: Response) => {
     try {
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate delay
         Logger.log('Fetching application type by ID:', req.params.id);
         // Gets the attraction type ID from the request parameters
         const applicationTypeId = parseInt(req.params.id);

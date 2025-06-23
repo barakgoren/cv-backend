@@ -15,7 +15,6 @@ const createApplicationType = async (applicationType: ApplicationTypeZSchema) =>
 
 const getApplicationTypes = async (companyId: number) => {
     try {
-        await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate delay for demonstration purposes
         const applicationTypes = await ApplicationType.find({ companyId });
         return applicationTypes;
     } catch (error) {
@@ -60,8 +59,8 @@ const updateApplicationType = async (applicationTypeId: number, updateData: Appl
         const savedApplicationType = await applicationType.save();
         Logger.log(`Application type with ID ${applicationTypeId} updated successfully`);
         return savedApplicationType;
-    } catch (error) {
-        throw new Error("Failed to update application type");
+    } catch (error: any) {
+        throw new Error(error.message || "Failed to update application type");
     }
 }
 
