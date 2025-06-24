@@ -31,6 +31,7 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 app.get('/', (req, res) => {
   res.send('Welcome to the CV Backend API!🚀');
 });
+// Test
 app.use('/api/users', userRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/application', applicationRoutes);
