@@ -149,7 +149,7 @@ export const analyzeCVText = async (text: string): Promise<CVAnalysis> => {
         //         {
         //             role: "system",
         //             content: `You are an expert CV/Resume analyzer. Extract and structure information from the provided CV text into a JSON format. 
-                    
+
         //             Important guidelines:
         //             - Extract all available information accurately
         //             - If information is not found, use empty string or empty array
@@ -276,23 +276,23 @@ export const analyzeCVText = async (text: string): Promise<CVAnalysis> => {
         // });
 
         // const result = completion.choices[0]?.message?.content;
-        
+
         // if (!result) {
         //     throw new Error('No response received from OpenAI');
         // }
 
         // Logger.log('CV analysis completed successfully');
-        
+
         // return JSON.parse(result) as CVAnalysis;
-        
+
     } catch (error: any) {
         Logger.error('Error in OpenAI CV analysis:', error);
-        
+
         // If it's a JSON parsing error, log the raw response
         if (error instanceof SyntaxError) {
             Logger.error('JSON parsing failed, raw response might be malformed');
         }
-        
+
         throw new Error(`CV analysis failed: ${error.message}`);
     }
 };
