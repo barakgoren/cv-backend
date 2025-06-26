@@ -19,7 +19,7 @@
  *           description: The user's username
  *           example: jogn.doe
  *         email:
- *           type: text
+ *           type: string
  *           format: email
  *           description: The user's email
  *           example: john@example.com

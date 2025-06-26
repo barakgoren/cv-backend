@@ -15,6 +15,10 @@
  *          type: string
  *          description: A brief description of the application type
  *          example: This application type is for junior software engineers
+ *         companyId:
+ *          type: number
+ *          description: The ID of the company this application type belongs to
+ *          example: 1
  *         isActive:
  *          type: boolean
  *          description: Indicates if the application type is active

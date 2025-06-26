@@ -4,9 +4,9 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Unknown API',
+      title: 'CV Backend API',
       version: '1.0.0',
-      description: 'Skinder is an app created by Barak Goren, Its purpose is to gather all the information about the ski and snowboard instructors from Israel on the most popular ski resorts in the world.',
+      description: 'A comprehensive CV/Resume analysis and application management system with file upload capabilities, OpenAI-powered CV analysis, and company management features.',
     },
     components: {
       securitySchemes: {

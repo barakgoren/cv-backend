@@ -62,7 +62,7 @@ router.get('/', isAuth, getApplicationTypes)
  *    - bearerAuth: []
  *   parameters:
  *    - in: path
- *      name: applicationTypeId
+ *      name: id
  *      required: true
  *      schema:
  *        type: integer
@@ -91,7 +91,7 @@ router.get('/:id', getApplicationTypeById);
  *    - bearerAuth: []
  *   parameters:
  *    - in: path
- *      name: applicationTypeId
+ *      name: id
  *      required: true
  *      schema:
  *        type: integer
@@ -127,7 +127,7 @@ router.patch('/:id', isAuth, patchApplicationType);
  *    - bearerAuth: []
  *   parameters:
  *    - in: path
- *      name: applicationTypeId
+ *      name: id
  *      required: true
  *      schema:
  *        type: integer

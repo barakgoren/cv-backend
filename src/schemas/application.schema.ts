@@ -1,20 +1,10 @@
 import { z } from 'zod';
 
 const applicationZSchema = z.object({
-    firstName: z.string({
-        required_error: 'First name is required',
-        invalid_type_error: 'First name must be a string',
-    }),
-    lastName: z.string({
-        required_error: 'Last name is required',
-        invalid_type_error: 'Last name must be a string',
-    }),
-    companyId: z.number({
-        required_error: 'Company ID is required',
-        invalid_type_error: 'Company ID must be a number',
-    }),
-    email: z.string().email(),
-    phone: z.string().optional(),
+    fullName: z.string().min(1, "Full name is required"),
+    companyId: z.number().int().positive("Company ID must be a positive integer"),
+    applicationTypeId: z.number().int().optional(),
+    customFields: z.record(z.any()).optional(),
 });
 
 export type ApplicationZSchema = z.infer<typeof applicationZSchema>;

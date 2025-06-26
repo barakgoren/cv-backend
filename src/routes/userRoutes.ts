@@ -37,10 +37,23 @@ router.post('/', createUser);
  *           schema:
  *             $ref: '#/components/schemas/UserLoginDTO'
  *     responses:
- *       201:
- *         description: The user was successfully created
+ *       200:
+ *         description: User successfully logged in
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: string
+ *                   description: JWT token
+ *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
  *       400:
- *         description: Bad request
+ *         description: Bad request - invalid credentials
+ *       401:
+ *         description: Unauthorized - invalid username or password
+ *       500:
+ *         description: Internal server error
  */
 router.post('/login', login);
 
@@ -66,9 +79,13 @@ router.get('/', isAuth, isAdmin, getUsers);
  *   get:
  *     summary: Get the current user by token
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: The current user
+ *       401:
+ *         description: Unauthorized - invalid or missing token
  *       404:
  *         description: User not found
  *       500:

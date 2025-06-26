@@ -10,12 +10,12 @@
  *       properties:
  *         username:
  *           type: string
- *           description: The user's email
+ *           description: The user's username
  *         password:
  *           type: string
  *           description: The user's password
  */
 export interface UserLoginDTO {
-  email: string;
+  username: string;
   password: string;
 }

@@ -1,5 +1,5 @@
 import { LinkPreview } from "../types/LinkPreview";
-import * as cheerio from 'cheerio';
+import { load } from 'cheerio';
 import Logger from "./logger";
 
 export const fetchLinkPreview = async (url: string): Promise<LinkPreview | null> => {
@@ -18,7 +18,7 @@ export const fetchLinkPreview = async (url: string): Promise<LinkPreview | null>
         }
 
         const html = await response.text();
-        const $ = cheerio.load(html);
+        const $ = load(html);
 
         const preview: LinkPreview = {
             url: url,

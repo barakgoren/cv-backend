@@ -5,7 +5,6 @@ import { fetchLinkPreview } from "../utils/link-preview";
 import Logger from "../utils/logger";
 import { applicationTypeService } from "./application-type.service";
 import { CompanyError, companyService } from "./companyService";
-import * as cheerio from 'cheerio';
 
 
 
@@ -24,23 +23,28 @@ const getApplication = async (applicationId: number): Promise<IApplication | nul
     if (!application) {
         return null; // or throw an error if you prefer
     }
-    return await serializeApplication(application);
+    return await serializeApplication(application, { includeLinkPreviews: true });
 }
 
 const getApplicationsByCompanyId = async (companyId: number): Promise<any> => {
     const applications = await Application.find({ companyId, active: true });
     Logger.log(`Found ${applications.length} applications for company ID ${companyId}`);
-    return Promise.all(applications.map(serializeApplication));
+    return Promise.all(applications.map(app => serializeApplication(app, { includeLinkPreviews: false })));
 }
 
-async function serializeApplication(application: IApplication): Promise<any> {
+async function serializeApplication(application: IApplication, options: { includeLinkPreviews?: boolean } = { includeLinkPreviews: true }): Promise<any> {
     const applicationType = application.applicationTypeId ? await applicationTypeService.getApplicationTypeById(application.applicationTypeId) : null;
     const company = application.companyId ? await companyService.getCompany(application.companyId) : null;
-    return {
+    
+    const serialized: any = {
         ...application.toObject(),
         applicationTypeName: applicationType ? applicationType.name : null,
         companyName: company ? company.name : null,
-        linkPreviews: application.customFields ? await Promise.all(
+    };
+
+    // Only include link previews if requested (default: true for single application, false for multiple)
+    if (options.includeLinkPreviews && application.customFields) {
+        serialized.linkPreviews = await Promise.all(
             Object.entries(application.customFields).map(async ([key, value]) => {
                 console.log({ key, value });
 
@@ -50,8 +54,10 @@ async function serializeApplication(application: IApplication): Promise<any> {
                 }
                 return { key, preview: null };
             })
-        ) : []
-    };
+        );
+    }
+
+    return serialized;
 }
 
 

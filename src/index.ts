@@ -4,6 +4,7 @@ import userRoutes from './routes/userRoutes';
 import companyRoutes from './routes/companyRoutes';
 import applicationRoutes from './routes/applicationRoutes';
 import applicationTypeRoutes from './routes/applicationTypeRoutes';
+import fileUploadRoutes from './routes/fileUploadRoutes';
 import swaggerUi from 'swagger-ui-express';
 import swaggerDocs from './config/swaggerConfig';
 import dotenv from 'dotenv';
@@ -31,11 +32,11 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 app.get('/', (req, res) => {
   res.send('Welcome to the CV Backend API!🚀');
 });
-// Test
 app.use('/api/users', userRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/application', applicationRoutes);
 app.use('/api/application-type', applicationTypeRoutes);
+app.use('/api/files', fileUploadRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use('/*', (req, res) => {
   res.status(404).send(`
@@ -57,6 +58,7 @@ app.use('/*', (req, res) => {
         <ul>
           <li><a href="/">/</a> - Main route</li>
           <li><a href="/api/users">/api/users</a> - User API endpoints</li>
+          <li><a href="/api/files">/api/files</a> - File upload API endpoints</li>
           <li><a href="/api-docs">/api-docs</a> - Swagger API documentation</li>
         </ul>
       </body>
