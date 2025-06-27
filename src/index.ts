@@ -13,25 +13,6 @@ import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
 
-// Add at the top after imports
-if (process.env.NODE_ENV === 'production') {
-  // Set memory warning threshold
-  process.on('warning', (warning) => {
-    if (warning.name === 'MaxListenersExceededWarning') {
-      Logger.warning('MaxListenersExceededWarning:', warning);
-    }
-  });
-
-  // Monitor memory usage
-  setInterval(() => {
-    const memUsage = process.memoryUsage();
-    const heapUsedMB = Math.round(memUsage.heapUsed / 1024 / 1024);
-    if (heapUsedMB > 200) { // Warning at 200MB
-      Logger.warning(`High memory usage: ${heapUsedMB}MB`);
-    }
-  }, 30000); // Check every 30 seconds
-}
-
 dotenv.config(); // Load environment variables
 
 const app = express();
