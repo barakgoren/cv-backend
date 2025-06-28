@@ -7,6 +7,7 @@ import Company from "../models/Company";
 import Application, { IApplication, ApplicationModel } from "../models/Application";
 import Logger from "../utils/logger";
 import { fileUploadService, UploadResult } from "../services/fileUploadService";
+import ApplicationType from "../models/ApplicationType";
 
 /**
  * Extract the key from a fieldname like "customFields[resume]" -> "resume"
@@ -121,5 +122,26 @@ export const getApplicationsByCompanyId = async (req: Request, res: Response) =>
             message: error.message || 'An error occurred while fetching the applications',
             data: null
         });
+    }
+}
+
+export const compareApplicants = async (req: Request, res: Response) => {
+    const { applicationIds, applicationTypeId } = req.body;
+    if (!applicationIds || !Array.isArray(applicationIds) || applicationIds.length === 0) {
+        return BadRequest(res, { message: "applicationIds is required and should be a non-empty array" });
+    }
+    try {
+        const applications = await Application.find({ uid: { $in: applicationIds } })
+        const applicationType = await ApplicationType.findByUid(applicationTypeId);
+        if (!applicationType) {
+            return NotFound(res, { message: "Application type not found" });
+        }
+        if (applications.length === 0) {
+            return BadRequest(res, { message: "No applications found for the provided applicationIds" });
+        }
+        const compareResult = await applicationService.compareApplicants(applications, applicationType);
+        Success(res, compareResult);
+    } catch (error: any) {
+        return InternalServerError(res, { message: "An error occurred while comparing applicants" });
     }
 }

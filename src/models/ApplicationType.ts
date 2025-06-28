@@ -6,6 +6,8 @@ export interface IApplicationType extends SoftDeleteDocument {
     description: string;
     companyId: number;
     isActive: boolean;
+    qualifications: string[]; // Array of qualifications required for this application type
+    formFields: IFormField[]; // Custom form fields for this application type
 }
 
 export enum FieldType {
@@ -48,6 +50,11 @@ const applicationTypeSchema = new Schema<IApplicationType>(
         isActive: {
             type: Boolean,
             default: false,
+        },
+        qualifications: {
+            type: [String], // Array of qualifications required for this application type
+            default: [],
+            required: false, // Qualifications for this application type
         },
         formFields: {
             type: [

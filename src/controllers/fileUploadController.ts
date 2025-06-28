@@ -61,14 +61,12 @@ export const uploadFile = async (req: Request, res: Response) => {
             folder
         );
 
-        Logger.log(`File uploaded successfully: ${result.key}`);
 
         return Success(res, {
             message: 'File uploaded successfully',
             data: result,
         });
     } catch (error: any) {
-        Logger.error('Error in uploadFile controller:', error);
         return InternalServerError(res, {
             message: error.message || 'Failed to upload file',
             data: null,
@@ -102,14 +100,12 @@ export const uploadFiles = async (req: Request, res: Response) => {
 
         const results = await Promise.all(uploadPromises);
 
-        Logger.log(`${results.length} files uploaded successfully`);
 
         return Success(res, {
             message: `${results.length} files uploaded successfully`,
             data: results,
         });
     } catch (error: any) {
-        Logger.error('Error in uploadFiles controller:', error);
         return InternalServerError(res, {
             message: error.message || 'Failed to upload files',
             data: null,
@@ -142,14 +138,12 @@ export const deleteFile = async (req: Request, res: Response) => {
 
         await fileUploadService.deleteFile(key);
 
-        Logger.log(`File deleted successfully: ${key}`);
 
         return Success(res, {
             message: 'File deleted successfully',
             data: { key },
         });
     } catch (error: any) {
-        Logger.error('Error in deleteFile controller:', error);
         return InternalServerError(res, {
             message: error.message || 'Failed to delete file',
             data: null,
@@ -192,7 +186,6 @@ export const getFileUrl = async (req: Request, res: Response) => {
             },
         });
     } catch (error: any) {
-        Logger.error('Error in getFileUrl controller:', error);
         return InternalServerError(res, {
             message: error.message || 'Failed to generate file URL',
             data: null,
@@ -219,7 +212,6 @@ export const listFiles = async (req: Request, res: Response) => {
             },
         });
     } catch (error: any) {
-        Logger.error('Error in listFiles controller:', error);
         return InternalServerError(res, {
             message: error.message || 'Failed to list files',
             data: null,
@@ -258,7 +250,6 @@ export const getFileInfo = async (req: Request, res: Response) => {
             },
         });
     } catch (error: any) {
-        Logger.error('Error in getFileInfo controller:', error);
         return InternalServerError(res, {
             message: error.message || 'Failed to get file information',
             data: null,
@@ -282,7 +273,6 @@ export const healthCheck = async (req: Request, res: Response) => {
             },
         });
     } catch (error: any) {
-        Logger.error('File upload service health check failed:', error);
         return InternalServerError(res, {
             message: 'File upload service is unhealthy',
             data: {
@@ -308,14 +298,12 @@ export const debugEnv = async (req: Request, res: Response) => {
             endpointValue: process.env.R2_ENDPOINT || 'UNDEFINED'
         };
 
-        Logger.log('Environment debug:', envStatus);
 
         return Success(res, {
             message: 'Environment variables status',
             data: envStatus,
         });
     } catch (error: any) {
-        Logger.error('Error in debugEnv controller:', error);
         return InternalServerError(res, {
             message: error.message || 'Failed to check environment',
             data: null,
@@ -348,7 +336,6 @@ export const readPdfFile = async (req: Request, res: Response) => {
             });
         }
 
-        Logger.log(`Starting PDF analysis for URL: ${fileUrl}`);
 
         // Fetch and parse PDF
         const ress = await fetch(fileUrl);
@@ -365,20 +352,13 @@ export const readPdfFile = async (req: Request, res: Response) => {
 
         // Check if text was extracted
         if (!pdfData.text || pdfData.text.trim().length === 0) {
-            Logger.warning('No text extracted from PDF');
             return BadRequest(res, {
                 message: 'No text could be extracted from the PDF. The file may be image-based or corrupted.',
                 data: null,
             });
         }
-
-        Logger.log(`PDF text extracted successfully. Length: ${pdfData.text.length} characters`);
-
         // Analyze the extracted text with OpenAI
-        const analyzedData = await openaiService.analyzeCVText(pdfData.text);
-
-        Logger.log('PDF analysis completed successfully');
-
+        const analyzedData = await openaiService.useAI({ text: pdfData.text });
         return Success(res, {
             analysis: analyzedData,
             metadata: {
@@ -389,8 +369,6 @@ export const readPdfFile = async (req: Request, res: Response) => {
         });
 
     } catch (error: any) {
-        Logger.error('Error reading PDF file:', error);
-
         // Handle specific error types
         if (error.message.includes('CV analysis failed')) {
             return InternalServerError(res, {

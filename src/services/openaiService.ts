@@ -1,6 +1,8 @@
 import OpenAI from 'openai';
 import Logger from '../utils/logger';
 import { CVAnalysis } from '../types/CVAnalysis';
+import { applicantsCompareSchema, ApplicantsCompareResponse } from '../schemas/ai-schemas/applicants.schema';
+import { cache } from '../utils/cache';
 
 const mockAiResponse: CVAnalysis = {
     personalInfo: {
@@ -127,163 +129,159 @@ const getOpenAIClient = (): OpenAI => {
     return openaiClient;
 };
 
-export const analyzeCVText = async (text: string): Promise<CVAnalysis> => {
+export const useAI = async <T = CVAnalysis>({ text, schema, content }: { schema?: any; content?: string; text: string }): Promise<T> => {
     try {
         // For development/testing purposes, return mock data
-        Logger.log('Using mock CV analysis response');
-        return mockAiResponse;
+        // Logger.log('Using mock CV analysis response');
+        // return mockAiResponse;
 
         // Uncomment below for actual OpenAI integration
-        // if (!text || text.trim().length === 0) {
-        //     throw new Error('No text provided for analysis');
-        // }
+        if (!text || text.trim().length === 0) {
+            throw new Error('No text provided for analysis');
+        }
 
-        // Logger.log('Starting CV analysis with OpenAI');
+        // Get the OpenAI client (will initialize if needed)
+        const openai = getOpenAIClient();
 
-        // // Get the OpenAI client (will initialize if needed)
-        // const openai = getOpenAIClient();
+        const completion = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+                {
+                    role: "system",
+                    content: `You are an expert CV/Resume analyzer. Extract and structure information from the provided CV text into a JSON format. 
 
-        // const completion = await openai.chat.completions.create({
-        //     model: "gpt-4o",
-        //     messages: [
-        //         {
-        //             role: "system",
-        //             content: `You are an expert CV/Resume analyzer. Extract and structure information from the provided CV text into a JSON format. 
+                    Important guidelines:
+                    - Extract all available information accurately
+                    - If information is not found, use empty string or empty array
+                    - For Hebrew text, translate names of companies/institutions to English if they're well-known, otherwise keep original
+                    - Parse dates in a consistent format
+                    - Group similar skills together
+                    - Extract key achievements and responsibilities
+                    - Be thorough but concise in descriptions`
+                },
+                {
+                    role: "user",
+                    content: !content ? `Please analyze this CV/Resume text and extract structured information:\n\n${text}` : content
+                }
+            ],
+            response_format: !schema ? {
+                type: "json_schema",
+                json_schema: {
+                    name: "cv_analysis",
+                    schema: {
+                        type: "object",
+                        properties: {
+                            personalInfo: {
+                                type: "object",
+                                properties: {
+                                    fullName: { type: "string" },
+                                    email: { type: "string" },
+                                    phone: { type: "string" },
+                                    address: { type: "string" },
+                                    linkedinUrl: { type: "string" },
+                                    portfolioUrl: { type: "string" }
+                                },
+                                required: ["fullName"]
+                            },
+                            summary: { type: "string" },
+                            skills: {
+                                type: "object",
+                                properties: {
+                                    technical: {
+                                        type: "array",
+                                        items: { type: "string" }
+                                    },
+                                    soft: {
+                                        type: "array",
+                                        items: { type: "string" }
+                                    },
+                                    languages: {
+                                        type: "array",
+                                        items: { type: "string" }
+                                    }
+                                },
+                                required: ["technical", "soft", "languages"]
+                            },
+                            experience: {
+                                type: "array",
+                                items: {
+                                    type: "object",
+                                    properties: {
+                                        company: { type: "string" },
+                                        position: { type: "string" },
+                                        duration: { type: "string" },
+                                        description: { type: "string" },
+                                        achievements: {
+                                            type: "array",
+                                            items: { type: "string" }
+                                        }
+                                    },
+                                    required: ["company", "position", "duration", "description"]
+                                }
+                            },
+                            education: {
+                                type: "array",
+                                items: {
+                                    type: "object",
+                                    properties: {
+                                        institution: { type: "string" },
+                                        degree: { type: "string" },
+                                        field: { type: "string" },
+                                        graduationYear: { type: "string" },
+                                        gpa: { type: "string" }
+                                    },
+                                    required: ["institution", "degree", "field"]
+                                }
+                            },
+                            certifications: {
+                                type: "array",
+                                items: {
+                                    type: "object",
+                                    properties: {
+                                        name: { type: "string" },
+                                        issuer: { type: "string" },
+                                        date: { type: "string" }
+                                    },
+                                    required: ["name", "issuer"]
+                                }
+                            },
+                            projects: {
+                                type: "array",
+                                items: {
+                                    type: "object",
+                                    properties: {
+                                        name: { type: "string" },
+                                        description: { type: "string" },
+                                        technologies: {
+                                            type: "array",
+                                            items: { type: "string" }
+                                        },
+                                        link: { type: "string" }
+                                    },
+                                    required: ["name", "description", "technologies"]
+                                }
+                            },
+                            awards: {
+                                type: "array",
+                                items: { type: "string" }
+                            },
+                            additionalInfo: { type: "string" }
+                        },
+                        required: ["personalInfo", "summary", "skills", "experience", "education", "certifications", "projects"]
+                    }
+                }
+            } : schema,
+            temperature: 0.1,
+            max_tokens: 4000
+        });
 
-        //             Important guidelines:
-        //             - Extract all available information accurately
-        //             - If information is not found, use empty string or empty array
-        //             - For Hebrew text, translate names of companies/institutions to English if they're well-known, otherwise keep original
-        //             - Parse dates in a consistent format
-        //             - Group similar skills together
-        //             - Extract key achievements and responsibilities
-        //             - Be thorough but concise in descriptions`
-        //         },
-        //         {
-        //             role: "user",
-        //             content: `Please analyze this CV/Resume text and extract structured information:\n\n${text}`
-        //         }
-        //     ],
-        //     response_format: {
-        //         type: "json_schema",
-        //         json_schema: {
-        //             name: "cv_analysis",
-        //             schema: {
-        //                 type: "object",
-        //                 properties: {
-        //                     personalInfo: {
-        //                         type: "object",
-        //                         properties: {
-        //                             fullName: { type: "string" },
-        //                             email: { type: "string" },
-        //                             phone: { type: "string" },
-        //                             address: { type: "string" },
-        //                             linkedinUrl: { type: "string" },
-        //                             portfolioUrl: { type: "string" }
-        //                         },
-        //                         required: ["fullName"]
-        //                     },
-        //                     summary: { type: "string" },
-        //                     skills: {
-        //                         type: "object",
-        //                         properties: {
-        //                             technical: {
-        //                                 type: "array",
-        //                                 items: { type: "string" }
-        //                             },
-        //                             soft: {
-        //                                 type: "array",
-        //                                 items: { type: "string" }
-        //                             },
-        //                             languages: {
-        //                                 type: "array",
-        //                                 items: { type: "string" }
-        //                             }
-        //                         },
-        //                         required: ["technical", "soft", "languages"]
-        //                     },
-        //                     experience: {
-        //                         type: "array",
-        //                         items: {
-        //                             type: "object",
-        //                             properties: {
-        //                                 company: { type: "string" },
-        //                                 position: { type: "string" },
-        //                                 duration: { type: "string" },
-        //                                 description: { type: "string" },
-        //                                 achievements: {
-        //                                     type: "array",
-        //                                     items: { type: "string" }
-        //                                 }
-        //                             },
-        //                             required: ["company", "position", "duration", "description"]
-        //                         }
-        //                     },
-        //                     education: {
-        //                         type: "array",
-        //                         items: {
-        //                             type: "object",
-        //                             properties: {
-        //                                 institution: { type: "string" },
-        //                                 degree: { type: "string" },
-        //                                 field: { type: "string" },
-        //                                 graduationYear: { type: "string" },
-        //                                 gpa: { type: "string" }
-        //                             },
-        //                             required: ["institution", "degree", "field"]
-        //                         }
-        //                     },
-        //                     certifications: {
-        //                         type: "array",
-        //                         items: {
-        //                             type: "object",
-        //                             properties: {
-        //                                 name: { type: "string" },
-        //                                 issuer: { type: "string" },
-        //                                 date: { type: "string" }
-        //                             },
-        //                             required: ["name", "issuer"]
-        //                         }
-        //                     },
-        //                     projects: {
-        //                         type: "array",
-        //                         items: {
-        //                             type: "object",
-        //                             properties: {
-        //                                 name: { type: "string" },
-        //                                 description: { type: "string" },
-        //                                 technologies: {
-        //                                     type: "array",
-        //                                     items: { type: "string" }
-        //                                 },
-        //                                 link: { type: "string" }
-        //                             },
-        //                             required: ["name", "description", "technologies"]
-        //                         }
-        //                     },
-        //                     awards: {
-        //                         type: "array",
-        //                         items: { type: "string" }
-        //                     },
-        //                     additionalInfo: { type: "string" }
-        //                 },
-        //                 required: ["personalInfo", "summary", "skills", "experience", "education", "certifications", "projects"]
-        //             }
-        //         }
-        //     },
-        //     temperature: 0.1,
-        //     max_tokens: 4000
-        // });
+        const result = completion.choices[0]?.message?.content;
 
-        // const result = completion.choices[0]?.message?.content;
+        if (!result) {
+            throw new Error('No response received from OpenAI');
+        }
 
-        // if (!result) {
-        //     throw new Error('No response received from OpenAI');
-        // }
-
-        // Logger.log('CV analysis completed successfully');
-
-        // return JSON.parse(result) as CVAnalysis;
+        return JSON.parse(result) as T;
 
     } catch (error: any) {
         Logger.error('Error in OpenAI CV analysis:', error);
@@ -297,6 +295,124 @@ export const analyzeCVText = async (text: string): Promise<CVAnalysis> => {
     }
 };
 
+export const compareApplicants = async ({
+    position,
+    applicants
+}: {
+    position: {
+        title: string;
+        description: string;
+        requirements?: string[];
+    }
+    applicants: {
+        name: string;
+        cv: string;
+    }[];
+}): Promise<ApplicantsCompareResponse> => {
+    try {
+        const key = applicants.map(app => app.name).join('-') + '-' + position.title;
+        // Check if we have a cached result
+        const cachedResult = cache.get(key);
+        if (cachedResult) {
+            Logger.log(`Returning cached comparison result for key: ${key}`);
+            return cachedResult;
+        }
+        if (!applicants || applicants.length === 0) {
+            throw new Error('No applicants provided for comparison');
+        }
+
+        if (!position || !position.description || position.description.trim().length === 0) {
+            throw new Error('No job description provided for comparison');
+        }
+
+        const openai = getOpenAIClient();
+
+        // Format CVs with applicant names and numbers for easier reference
+        const formattedCVs = applicants.map((applicant, index) =>
+            `=== CV ${index + 1} - ${applicant.name} ===\n${applicant.cv}\n`
+        ).join('\n');
+
+        const systemPrompt = `You are an expert HR recruiter and CV analyzer. Your task is to:
+
+1. Analyze each provided CV against the given job description and requirements
+2. Extract key personal information from each CV
+3. Calculate a match percentage (0-100) based on:
+   - Skills alignment with job requirements
+   - Experience relevance and level
+   - Education background fit
+   - Overall career trajectory match
+4. Provide a clear reason for the match percentage
+5. Assign an appropriate match label
+6. Give some points of strengths and areas for improvement for each applicant
+
+Match Labels Guidelines:
+- "Excellent Match" (90-100%): Perfect or near-perfect alignment
+- "Good Match" (70-89%): Strong alignment with minor gaps
+- "Fair Match" (50-69%): Reasonable fit with some gaps
+- "Poor Match" (30-49%): Significant gaps but some relevant experience
+- "No Match" (0-29%): Little to no relevant experience or skills
+
+Be thorough but concise in your analysis. Focus on concrete skills, experience, and qualifications.`;
+
+        const userPrompt = `Please analyze and compare the following CVs against this job position:
+
+JOB POSITION:
+Title: ${position.title}
+Description: ${position.description}
+
+${position.requirements && position.requirements.length > 0 ? `ADDITIONAL REQUIREMENTS:\n${position.requirements.join('\n')}\n` : ''}
+
+CVS TO ANALYZE:
+${formattedCVs}
+
+Please provide a structured comparison with match percentages, reasons, and extracted personal information for each applicant.`;
+
+        const completion = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+                {
+                    role: "system",
+                    content: systemPrompt
+                },
+                {
+                    role: "user",
+                    content: userPrompt
+                }
+            ],
+            response_format: applicantsCompareSchema,
+            temperature: 0.1,
+            max_tokens: 4000
+        });
+
+        const result = completion.choices[0]?.message?.content;
+
+        if (!result) {
+            throw new Error('No response received from OpenAI');
+        }
+
+        const parsedResult = JSON.parse(result) as ApplicantsCompareResponse;
+
+        // Validate that we have the expected number of applicants
+        if (parsedResult.applicants.length !== applicants.length) {
+            Logger.warning(`Expected ${applicants.length} applicants, got ${parsedResult.applicants.length}`);
+        }
+
+        // Cache the result for future use
+        cache.set(key, parsedResult, 60 * 60 * 24); // Cache for 24 hours
+        return parsedResult;
+
+    } catch (error: any) {
+        Logger.error('Error in OpenAI applicants comparison:', error);
+
+        if (error instanceof SyntaxError) {
+            Logger.error('JSON parsing failed, raw response might be malformed');
+        }
+
+        throw new Error(`Applicants comparison failed: ${error.message}`);
+    }
+};
+
 export const openaiService = {
-    analyzeCVText
+    useAI,
+    compareApplicants
 };
