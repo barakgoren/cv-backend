@@ -131,7 +131,6 @@ export const updateApplicationType = async (req: Request, res: Response) => {
 
 export const getApplicationTypeById = async (req: Request, res: Response) => {
     try {
-        Logger.log('Fetching application type by ID:', req.params.id);
         // Gets the attraction type ID from the request parameters
         const applicationTypeId = parseInt(req.params.id);
         if (isNaN(applicationTypeId)) {
@@ -139,11 +138,9 @@ export const getApplicationTypeById = async (req: Request, res: Response) => {
         }
         // Fetches the application type by ID
         const applicationType = await applicationTypeService.getApplicationTypeById(applicationTypeId);
-        Logger.log('Fetched application type:', applicationType);
         if (!applicationType) {
             return NotFound(res, { data: null, message: `Application type with ID ${applicationTypeId} not found`, });
         }
-        Logger.log('Returning application type:', applicationType);
         return Success(res, applicationType);
     } catch (error: any) {
         if (error.message) {

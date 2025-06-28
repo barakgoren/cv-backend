@@ -32,7 +32,6 @@ const getApplication = async (applicationId: number): Promise<IApplication | nul
 
 const getApplicationsByCompanyId = async (companyId: number): Promise<any> => {
     const applications = await Application.find({ companyId, active: true });
-    Logger.log(`Found ${applications.length} applications for company ID ${companyId}`);
     return Promise.all(applications.map(app => serializeApplication(app, { includeLinkPreviews: false })));
 }
 

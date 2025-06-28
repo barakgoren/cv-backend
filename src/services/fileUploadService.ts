@@ -52,13 +52,6 @@ class FileUploadService {
         });
 
         this.initialized = true;
-        Logger.log('FileUploadService initialized with R2 configuration', {
-            bucket: this.bucket,
-            endpoint: this.endpoint,
-            publicUrl: this.publicUrl,
-            hasAccessKey: !!process.env.R2_ACCESS_KEY_ID,
-            hasSecretKey: !!process.env.R2_SECRET_ACCESS_KEY
-        });
     }
 
     private validateEnvironmentVariables(): void {
@@ -69,8 +62,6 @@ class FileUploadService {
             Logger.error('Missing required environment variables:', missingVars);
             throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
         }
-
-        Logger.log('Environment variables validated successfully');
     }
 
     /**
@@ -106,8 +97,6 @@ class FileUploadService {
             // Generate public URL for the uploaded file
             const fileUrl = `${this.publicUrl}/${key}`;
 
-            Logger.log(`File uploaded successfully: ${key}`);
-
             return {
                 key,
                 url: fileUrl,
@@ -134,7 +123,6 @@ class FileUploadService {
             });
 
             await this.s3Client!.send(deleteCommand);
-            Logger.log(`File deleted successfully: ${key}`);
         } catch (error) {
             Logger.error('Error deleting file from R2:', error);
             throw new Error(`Failed to delete file: ${error instanceof Error ? error.message : 'Unknown error'}`);

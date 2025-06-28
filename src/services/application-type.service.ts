@@ -42,7 +42,6 @@ const patchApplicationType = async (applicationTypeId: number, updateData: Parti
         }
         Object.assign(updatedApplicationType, updateData);
         const savedApplicationType = await updatedApplicationType.save();
-        Logger.log(`Application type with ID ${applicationTypeId} updated its params: ${Object.keys(updateData).join(', ')} successfully`);
         return savedApplicationType;
     } catch (error) {
         throw new Error("Failed to update application type");
@@ -57,7 +56,6 @@ const updateApplicationType = async (applicationTypeId: number, updateData: Appl
         }
         Object.assign(applicationType, updateData);
         const savedApplicationType = await applicationType.save();
-        Logger.log(`Application type with ID ${applicationTypeId} updated successfully`);
         return savedApplicationType;
     } catch (error: any) {
         throw new Error(error.message || "Failed to update application type");
@@ -71,7 +69,6 @@ const deleteApplicationType = async (applicationTypeId: number) => {
             throw new Error("Application type not found");
         }
         await applicationType.softDelete();
-        Logger.log(`Application type with ID ${applicationTypeId} deleted successfully`);
         return applicationType;
     } catch (error) {
         throw new Error("Failed to delete application type");
